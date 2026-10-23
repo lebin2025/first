@@ -1,0 +1,128 @@
+/* ============================================================================
+   Focus Page · 四套沉浸主题设计令牌
+   [data-focus-theme="forest" | "sunset" | "snow" | "moon"]
+   ========================================================================== */
+
+:root,
+html[data-focus-theme='forest'] {
+  --focus-bg-img: url('/bg-forest.jpg');
+  --focus-bg: #07170f;
+  --focus-bg-mask: rgba(10, 20, 15, 0.5);
+  --focus-mask-backdrop: blur(0px);
+  --focus-text-color: #ffffff;
+  --ring-glow: #7dffc4;
+  --particle-color: 130, 255, 190;
+  --particle-secondary: 110, 230, 255;
+
+  --focus-mask: var(--focus-bg-mask);
+  --focus-text: var(--focus-text-color);
+  --focus-ring: var(--ring-glow);
+  --focus-text-strong: #ffffff;
+  --focus-text-soft: rgba(241, 255, 245, 0.72);
+  --focus-text-faint: rgba(241, 255, 245, 0.48);
+  --focus-glass: rgba(8, 38, 26, 0.36);
+  --focus-border: rgba(170, 235, 190, 0.24);
+  --focus-halo: rgba(100, 255, 170, 0.3);
+  --focus-overlay: rgba(3, 18, 12, 0.66);
+  --focus-panel: rgba(6, 28, 19, 0.8);
+  --focus-accent: #7dffc4;
+  --focus-text-shadow: 0 0 10px rgba(100, 255, 150, 0.5);
+  --cosmos-bg: transparent;
+}
+
+html[data-focus-theme='sunset'] {
+  --focus-bg-img: url('/bg-sunset.jpg');
+  --focus-bg: #f6ead6;
+  --focus-bg-mask: rgba(255, 255, 255, 0.4);
+  --focus-mask-backdrop: blur(4px);
+  --focus-text-color: #18212b;
+  --ring-glow: #e0a24a;
+  --particle-color: 255, 214, 140;
+  --particle-secondary: 255, 244, 200;
+
+  --focus-mask: var(--focus-bg-mask);
+  --focus-text: var(--focus-text-color);
+  --focus-ring: var(--ring-glow);
+  --focus-text-strong: #0f172a;
+  --focus-text-soft: rgba(24, 33, 43, 0.72);
+  --focus-text-faint: rgba(24, 33, 43, 0.48);
+  --focus-glass: rgba(255, 252, 244, 0.46);
+  --focus-border: rgba(107, 78, 38, 0.2);
+  --focus-halo: rgba(255, 190, 90, 0.3);
+  --focus-overlay: rgba(255, 248, 235, 0.64);
+  --focus-panel: rgba(255, 250, 242, 0.82);
+  --focus-accent: #b56a2a;
+  --focus-text-shadow: 0 0 22px rgba(255, 255, 255, 0.52);
+  --cosmos-bg: transparent;
+}
+
+html[data-focus-theme='snow'] {
+  --focus-bg-img: url('/bg-snow.jpg');
+  --focus-bg: #eaf4fb;
+  --focus-bg-mask: rgba(255, 255, 255, 0.4);
+  --focus-mask-backdrop: blur(3px);
+  --focus-text-color: #4a3b4e;
+  --ring-glow: #f2b8c6;
+  --particle-color: 255, 255, 255;
+  --particle-secondary: 250, 210, 225;
+
+  --focus-mask: var(--focus-bg-mask);
+  --focus-text: var(--focus-text-color);
+  --focus-ring: var(--ring-glow);
+  --focus-text-strong: #3f3143;
+  --focus-text-soft: rgba(74, 59, 78, 0.72);
+  --focus-text-faint: rgba(74, 59, 78, 0.5);
+  --focus-glass: rgba(255, 255, 255, 0.48);
+  --focus-border: rgba(120, 92, 125, 0.22);
+  --focus-halo: rgba(242, 184, 198, 0.32);
+  --focus-overlay: rgba(255, 250, 252, 0.7);
+  --focus-panel: rgba(255, 252, 254, 0.86);
+  --focus-accent: #9d6f8f;
+  --focus-text-shadow: 0 0 14px rgba(255, 255, 255, 0.62);
+  --cosmos-bg: transparent;
+}
+
+html[data-focus-theme='moon'] {
+  --focus-bg-img: url('/bg-moon.jpg');
+  --focus-bg: #050a18;
+  --focus-bg-mask: rgba(15, 23, 42, 0.5);
+  --focus-mask-backdrop: blur(0px);
+  --focus-text-color: #ffffff;
+  --ring-glow: #8fb8ff;
+  --particle-color: 185, 210, 255;
+  --particle-secondary: 255, 198, 220;
+
+  --focus-mask: var(--focus-bg-mask);
+  --focus-text: var(--focus-text-color);
+  --focus-ring: var(--ring-glow);
+  --focus-text-strong: #ffffff;
+  --focus-text-soft: rgba(238, 245, 255, 0.72);
+  --focus-text-faint: rgba(238, 245, 255, 0.5);
+  --focus-glass: rgba(8, 18, 38, 0.36);
+  --focus-border: rgba(180, 210, 255, 0.22);
+  --focus-halo: rgba(120, 170, 255, 0.34);
+  --focus-overlay: rgba(3, 8, 20, 0.7);
+  --focus-panel: rgba(7, 16, 34, 0.8);
+  --focus-accent: #9cc4ff;
+  --focus-text-shadow: 0 0 28px rgba(145, 185, 255, 0.48);
+  --cosmos-bg: transparent;
+}
+
+/* 0.8s 主题过渡：颜色 / 发光，不打断 Ken Burns 与粒子运动 */
+.focus,
+.focus .timer__digits,
+.focus .timer__ring,
+.focus .timer__halo,
+.focus .timer-orbit,
+.focus .focus__ghost,
+.focus .focus__mode-btn,
+.focus .overlay__panel,
+.focus .focus-theme-dot {
+  transition:
+    color 0.8s ease-in-out,
+    background-color 0.8s ease-in-out,
+    border-color 0.8s ease-in-out,
+    box-shadow 0.8s ease-in-out,
+    text-shadow 0.8s ease-in-out,
+    filter 0.8s ease-in-out;
+}

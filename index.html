@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="forest">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      try {
+        const savedTheme = localStorage.getItem('shiguang.theme')
+        if (savedTheme === 'forest' || savedTheme === 'sakura' || savedTheme === 'snow') {
+          document.documentElement.dataset.theme = savedTheme
+        }
+      } catch {
+        // localStorage 不可用时保持默认 forest
+      }
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="拾光 · Picked Light：一个会自己调整的学习计划助手。先设定最终成果，拆成可执行的模块，打开网站只推「接下来 15 分钟做什么」。"
+    />
+    <meta name="theme-color" content="#eef1f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0e1a" media="(prefers-color-scheme: dark)" />
+    <title>拾光 · Picked Light</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

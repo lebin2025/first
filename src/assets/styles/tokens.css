@@ -1,0 +1,373 @@
+/* ==========================================================================
+   设计令牌（Design Tokens）· 三套水彩主题
+   --------------------------------------------------------------------------
+   所有颜色、玻璃、阴影、分隔线、图表色都从这里派生；
+   组件里只写布局，不直接写颜色。切换 html[data-theme] 即可整站换肤。
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* 字体 */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  /* 圆角 */
+  --radius-xs: 10px;
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
+  --radius-pill: 999px;
+
+  /* 间距 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 72px;
+
+  /* 动效 */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring-soft: cubic-bezier(0.22, 1.2, 0.36, 1);
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  --dur-instant: 120ms;
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+  --dur-slow: 480ms;
+  --dur-theme: 800ms;
+
+  --glass-blur: 22px;
+  --glass-blur-strong: 34px;
+  --transition-glass:
+    background-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-spring);
+
+  --breathe-duration: 3s;
+  --breathe-secondary-duration: 4.7s;
+  --breathe-lift: 3px;
+  --breathe-scale: 1.012;
+  --hover-scale: 1.045;
+  --press-scale: 0.97;
+}
+
+/* ==========================================================================
+   主题 1 · 星夜骑行（默认）
+   ========================================================================== */
+:root,
+html[data-theme='ride'] {
+  --theme-name: 'ride';
+  --bg-image: url('/bg-ride.jpg');
+  --bg-base: #0a0f1e;
+  --bg-deep: #050912;
+  --bg-mask: rgba(10, 15, 30, 0.45);
+  --art-mask: var(--bg-mask);
+  --art-vignette: rgba(2, 6, 18, 0.28);
+  --art-filter: saturate(0.95) contrast(1.04);
+
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.52);
+  --text-strong: #ffffff;
+  --text-inverse: #0b1424;
+  --heading-shadow: 0 2px 22px rgba(0, 0, 0, 0.45);
+
+  --glass-bg: rgba(20, 30, 50, 0.65);
+  --glass-bg-strong: rgba(20, 30, 50, 0.78);
+  --glass-bg-soft: rgba(20, 30, 50, 0.4);
+  --glass-bg-hover: rgba(30, 44, 70, 0.72);
+  --glass-fallback: rgba(11, 20, 34, 0.94);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-border-soft: rgba(255, 255, 255, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.2);
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 24px 50px -26px rgba(0, 0, 0, 0.8),
+    0 6px 16px -10px rgba(0, 0, 0, 0.48);
+  --glass-shadow-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 2px 4px rgba(0, 0, 0, 0.32),
+    0 32px 64px -28px rgba(0, 0, 0, 0.88),
+    0 10px 22px -12px rgba(0, 0, 0, 0.55);
+  --glass-shadow-pressed:
+    inset 0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 6px -4px rgba(0, 0, 0, 0.5);
+
+  --accent: #a8c8e8;
+  --accent-strong: #cfe2f5;
+  --accent-soft: rgba(168, 200, 232, 0.18);
+  --accent-softer: rgba(168, 200, 232, 0.1);
+  --accent-contrast: #0b1424;
+
+  --success: #8fd9b0;
+  --success-soft: rgba(143, 217, 176, 0.16);
+  --warning: #e8c184;
+  --warning-soft: rgba(232, 193, 132, 0.16);
+  --danger: #f0a0ab;
+  --danger-soft: rgba(240, 160, 171, 0.16);
+  --info: #9dc2ec;
+  --info-soft: rgba(157, 194, 236, 0.16);
+
+  --line: rgba(255, 255, 255, 0.13);
+  --line-soft: rgba(255, 255, 255, 0.07);
+  --overlay: rgba(3, 8, 20, 0.62);
+  --menu-overlay: rgba(5, 10, 24, 0.82);
+  --menu-text: #f4f8ff;
+  --menu-text-soft: rgba(244, 248, 255, 0.7);
+
+  --chart-1: #a8c8e8;
+  --chart-2: #7ea9d4;
+  --chart-3: #8fd9b0;
+  --chart-4: #e8c184;
+  --particle-core: 210, 232, 255;
+  --particle-glow: 124, 170, 230;
+
+  --cosmos-bg: #050a18;
+  --cosmos-peach: 255, 198, 220;
+  --cosmos-violet: 145, 165, 255;
+  --cosmos-star: 220, 236, 255;
+
+  --theme-dot-ride: #a8c8e8;
+  --theme-dot-sakura: #e5a9bd;
+  --theme-dot-winter: #9dc2ec;
+}
+
+/* ==========================================================================
+   主题 2 · 樱落
+   ========================================================================== */
+html[data-theme='sakura'] {
+  --theme-name: 'sakura';
+  --bg-image: url('/bg-sakura.jpg');
+  --bg-base: #f6e6ea;
+  --bg-deep: #edd3dd;
+  --art-mask: rgba(255, 255, 255, 0.3);
+  --art-vignette: rgba(120, 72, 92, 0.07);
+  --art-filter: saturate(0.94) contrast(1.01);
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-tertiary: #475569;
+  --text-strong: #020617;
+  --text-inverse: #fff8fa;
+  --heading-shadow: none;
+
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-bg-strong: rgba(255, 255, 255, 0.8);
+  --glass-bg-soft: rgba(255, 255, 255, 0.42);
+  --glass-bg-hover: rgba(255, 255, 255, 0.76);
+  --glass-fallback: rgba(255, 248, 251, 0.96);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-border-soft: rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 1px 2px rgba(90, 44, 62, 0.06),
+    0 22px 44px -26px rgba(104, 54, 76, 0.3),
+    0 6px 16px -10px rgba(104, 54, 76, 0.14);
+  --glass-shadow-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 2px 4px rgba(90, 44, 62, 0.06),
+    0 30px 60px -28px rgba(104, 54, 76, 0.38),
+    0 10px 22px -12px rgba(104, 54, 76, 0.18);
+  --glass-shadow-pressed:
+    inset 0 2px 6px rgba(90, 44, 62, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 6px -4px rgba(90, 44, 62, 0.18);
+
+  --accent: #b45c7d;
+  --accent-strong: #964663;
+  --accent-soft: rgba(180, 92, 125, 0.15);
+  --accent-softer: rgba(180, 92, 125, 0.08);
+  --accent-contrast: #ffffff;
+
+  --success: #5f8d72;
+  --success-soft: rgba(95, 141, 114, 0.14);
+  --warning: #b1814c;
+  --warning-soft: rgba(177, 129, 76, 0.16);
+  --danger: #c2556b;
+  --danger-soft: rgba(194, 85, 107, 0.14);
+  --info: #7d6aa8;
+  --info-soft: rgba(125, 106, 168, 0.14);
+
+  --line: rgba(74, 44, 62, 0.12);
+  --line-soft: rgba(74, 44, 62, 0.07);
+  --overlay: rgba(58, 28, 44, 0.28);
+  --menu-overlay: rgba(40, 18, 30, 0.76);
+  --menu-text: #fff7fa;
+  --menu-text-soft: rgba(255, 247, 250, 0.72);
+
+  --chart-1: #b45c7d;
+  --chart-2: #d48ba3;
+  --chart-3: #e8b8c7;
+  --chart-4: #f3d9e1;
+  --particle-core: 255, 225, 235;
+  --particle-glow: 245, 153, 187;
+
+  --cosmos-bg: #160b16;
+  --cosmos-peach: 255, 190, 205;
+  --cosmos-violet: 180, 140, 255;
+  --cosmos-star: 255, 236, 246;
+
+  --focus-bg: #1b0e16;
+  --focus-text: #f8e9ef;
+  --focus-text-strong: #fff8fa;
+  --focus-text-soft: rgba(248, 233, 239, 0.58);
+  --focus-text-faint: rgba(248, 233, 239, 0.42);
+  --focus-glass: rgba(255, 238, 244, 0.07);
+  --focus-border: rgba(255, 230, 239, 0.16);
+  --focus-ring: #f2aec4;
+  --focus-halo: rgba(242, 142, 177, 0.26);
+  --focus-overlay: rgba(15, 4, 10, 0.62);
+  --focus-panel: rgba(37, 14, 25, 0.78);
+  --focus-accent: #e891ad;
+
+  --theme-dot-ride: #a8c8e8;
+  --theme-dot-sakura: #e5a9bd;
+  --theme-dot-winter: #9dc2ec;
+}
+
+/* ==========================================================================
+   主题 3 · 冬日蓝调
+   ========================================================================== */
+html[data-theme='winter'] {
+  --theme-name: 'winter';
+  --bg-image: url('/bg-winter.jpg');
+  --bg-base: #eaf3fb;
+  --bg-deep: #d8e8f5;
+  --bg-mask: rgba(255, 255, 255, 0.35);
+  --art-mask: var(--bg-mask);
+  --art-vignette: rgba(26, 42, 68, 0.06);
+  --art-filter: saturate(0.94) contrast(1.01);
+
+  --text-primary: #1a2a44;
+  --text-secondary: rgba(26, 42, 68, 0.7);
+  --text-tertiary: rgba(26, 42, 68, 0.5);
+  --text-strong: #0f1d33;
+  --text-inverse: #ffffff;
+  --heading-shadow: none;
+
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-bg-strong: rgba(255, 255, 255, 0.88);
+  --glass-bg-soft: rgba(255, 255, 255, 0.5);
+  --glass-bg-hover: rgba(255, 255, 255, 0.84);
+  --glass-fallback: rgba(244, 249, 255, 0.97);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-border-soft: rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.96);
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 1px 2px rgba(26, 42, 68, 0.06),
+    0 22px 44px -26px rgba(40, 70, 105, 0.3),
+    0 6px 16px -10px rgba(40, 70, 105, 0.14);
+  --glass-shadow-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 2px 4px rgba(26, 42, 68, 0.06),
+    0 30px 60px -28px rgba(40, 70, 105, 0.36),
+    0 10px 22px -12px rgba(40, 70, 105, 0.18);
+  --glass-shadow-pressed:
+    inset 0 2px 6px rgba(26, 42, 68, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 6px -4px rgba(26, 42, 68, 0.16);
+
+  --accent: #3e6f9e;
+  --accent-strong: #2c557e;
+  --accent-soft: rgba(62, 111, 158, 0.15);
+  --accent-softer: rgba(62, 111, 158, 0.08);
+  --accent-contrast: #ffffff;
+
+  --success: #4f8a6c;
+  --success-soft: rgba(79, 138, 108, 0.14);
+  --warning: #a97832;
+  --warning-soft: rgba(169, 120, 50, 0.16);
+  --danger: #b95262;
+  --danger-soft: rgba(185, 82, 98, 0.14);
+  --info: #3e6f9e;
+  --info-soft: rgba(62, 111, 158, 0.14);
+
+  --line: rgba(26, 42, 68, 0.12);
+  --line-soft: rgba(26, 42, 68, 0.07);
+  --overlay: rgba(20, 35, 54, 0.3);
+  --menu-overlay: rgba(14, 28, 46, 0.78);
+  --menu-text: #f4f8ff;
+  --menu-text-soft: rgba(244, 248, 255, 0.72);
+
+  --chart-1: #3e6f9e;
+  --chart-2: #6d96bd;
+  --chart-3: #9dc2ec;
+  --chart-4: #d6e6f5;
+  --particle-core: 230, 244, 255;
+  --particle-glow: 157, 194, 236;
+
+  --cosmos-bg: #0a1524;
+  --cosmos-peach: 255, 220, 230;
+  --cosmos-violet: 150, 185, 235;
+  --cosmos-star: 235, 246, 255;
+
+  --theme-dot-ride: #a8c8e8;
+  --theme-dot-sakura: #e5a9bd;
+  --theme-dot-winter: #9dc2ec;
+}
+
+/* ==========================================================================
+   兼容别名：旧组件仍使用这些名字，全部指向新语义变量
+   ========================================================================== */
+:root {
+  --text: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --text-faint: var(--text-tertiary);
+  --glass-border-soft: color-mix(in srgb, var(--glass-border) 56%, transparent);
+  --aurora-two: var(--accent-strong);
+}
+
+/* ==========================================================================
+   主题切换过渡
+   ========================================================================== */
+html,
+body {
+  transition:
+    background-image 0.8s ease-in-out,
+    color 0.8s ease-in-out;
+}
+
+html.theme-transition,
+html.theme-transition body,
+html.theme-transition .glass,
+html.theme-transition .glass-card,
+html.theme-transition .page-head,
+html.theme-transition h1,
+html.theme-transition h2,
+html.theme-transition h3,
+html.theme-transition p,
+html.theme-transition a,
+html.theme-transition button,
+html.theme-transition .menu-item,
+html.theme-transition .menu-card {
+  transition:
+    background-color var(--dur-theme) var(--ease-out),
+    background-image var(--dur-theme) var(--ease-out),
+    color var(--dur-theme) var(--ease-out),
+    border-color var(--dur-theme) var(--ease-out),
+    box-shadow var(--dur-theme) var(--ease-out) !important;
+}
+
+/* ==========================================================================
+   降级：不支持 color-mix 时用固定半透明边
+   ========================================================================== */
+@supports not (color: color-mix(in srgb, white 50%, black)) {
+  :root {
+    --glass-border-soft: rgba(255, 255, 255, 0.35);
+  }
+}

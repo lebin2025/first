@@ -1,0 +1,43 @@
+{
+  "name": "shiguang-picked-light",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "拾光 · Picked Light —— 一个会自己调整的学习计划助手",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "build-only": "vite build",
+    "preview": "vite preview",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "vue-tsc --build"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "dayjs": "^1.11.23",
+    "lodash.debounce": "^4.0.8",
+    "pinia": "^4.0.3",
+    "vue": "^3.5.42",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "^24.0.5",
+    "@types/jsdom": "^30.0.0",
+    "@types/lodash.debounce": "^4.0.9",
+    "@types/node": "^24.13.4",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/test-utils": "^2.5.0",
+    "@vue/tsconfig": "^0.9.1",
+    "jsdom": "^30.0.1",
+    "npm-run-all2": "^9.0.3",
+    "typescript": "~6.0.0",
+    "vite": "^8.2.2",
+    "vite-plugin-vue-devtools": "^8.2.1",
+    "vitest": "^4.1.11",
+    "vue-tsc": "^3.3.11"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.12.0"
+  }
+}
