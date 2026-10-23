@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
+// 👈 1. 将 createWebHistory 改为 createWebHashHistory
+import { createRouter, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import StudyRoomView from '@/views/StudyRoomView.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -155,7 +156,8 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  // 👈 2. 改用 hash 模式，这样在 GitHub Pages 刷新任何子页面都不会 404
+  history: createWebHashHistory(),
   routes,
   scrollBehavior(_to, _from, savedPosition) {
     return savedPosition ?? { top: 0 }

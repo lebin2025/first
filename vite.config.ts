@@ -6,6 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/first/', // 👈 新增这一行，如果你的仓库名不叫 first，请替换成你的仓库名
   plugins: [
     vue(),
     vueDevTools(),
