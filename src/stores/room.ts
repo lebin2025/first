@@ -327,9 +327,12 @@ export const useRoomStore = defineStore('room', () => {
         room_id: room.id,
         user_id: auth.userId,
       })
-      // 23505 = 已在房间，按成功处理
+      // 23505 = 已在房间，按成功处理；23514 = 容量触发器拒绝
       if (joinError && joinError.code !== '23505') {
-        error.value = describeError(joinError)
+        error.value =
+          joinError.code === '23514'
+            ? '房间已满，无法加入'
+            : describeError(joinError)
         return null
       }
 

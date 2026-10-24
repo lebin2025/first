@@ -203,7 +203,13 @@ onMounted(loadRooms)
               :disabled="joining || roomFull(item.maxMembers, item.memberCount)"
               @click="joinByCode(item.inviteCode)"
             >
-              {{ joiningId === item.inviteCode ? '加入中…' : '加入房间' }}
+              {{
+                roomFull(item.maxMembers, item.memberCount)
+                  ? '房间已满'
+                  : joiningId === item.inviteCode
+                    ? '加入中…'
+                    : '加入房间'
+              }}
             </button>
           </GlassCard>
         </div>

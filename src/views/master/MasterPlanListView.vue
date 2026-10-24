@@ -138,24 +138,26 @@ onMounted(load)
               {{ summary.masterPlan.description }}
             </p>
 
-            <ProgressBar
-              :value="summary.progress"
-              label="整体进度"
-              show-value
-              :tone="statusTone(summary.status)"
-            />
-
-            <footer class="plan-card__foot">
-              <span class="numeric">{{ summary.subPlanCount }} 个分计划</span>
-              <span>{{ formatCN(summary.masterPlan.deadline) }} 截止</span>
-              <span class="numeric">
-                {{ summary.status === 'overdue' ? '已逾期' : `剩 ${remainingDays(summary.masterPlan.deadline)} 天` }}
-              </span>
-            </footer>
-
             <p v-if="summary.overdueSubPlanCount > 0" class="plan-card__warn">
               {{ summary.overdueSubPlanCount }} 个分计划已逾期，建议重新排期。
             </p>
+
+            <div class="plan-card__bottom">
+              <ProgressBar
+                :value="summary.progress"
+                label="整体进度"
+                show-value
+                :tone="statusTone(summary.status)"
+              />
+
+              <footer class="plan-card__foot">
+                <span class="numeric">{{ summary.subPlanCount }} 个分计划</span>
+                <span>{{ formatCN(summary.masterPlan.deadline) }} 截止</span>
+                <span class="numeric">
+                  {{ summary.status === 'overdue' ? '已逾期' : `剩 ${remainingDays(summary.masterPlan.deadline)} 天` }}
+                </span>
+              </footer>
+            </div>
           </GlassCard>
         </RouterLink>
       </div>
@@ -215,7 +217,7 @@ onMounted(load)
 
 .plan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
   align-items: stretch;
 }
@@ -255,6 +257,13 @@ onMounted(load)
   gap: var(--space-4);
   height: 100%;
   min-height: 220px;
+}
+
+.plan-card__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
 }
 
 .plan-card__head {
