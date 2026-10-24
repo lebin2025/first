@@ -153,7 +153,10 @@ export const useRoomStore = defineStore('room', () => {
         {},
       )
 
-      rooms.value = rows.map((row) => mapRoom(row, counts[row.id] ?? 0))
+      rooms.value = rows
+        .map((row) => mapRoom(row, counts[row.id] ?? 0))
+        // 前端只展示真实有人的房间；空房间交给数据库触发器清理
+        .filter((room) => room.memberCount > 0)
       return rooms.value
     } catch (cause) {
       error.value = describeError(cause)
@@ -177,7 +180,7 @@ export const useRoomStore = defineStore('room', () => {
         return null
       }
       if (!roomRow) {
-        error.value = '房间不存在，或已被房主删除。'
+        error.value = '房间不存在，或已被关闭。'
         return null
       }
 
@@ -266,7 +269,7 @@ export const useRoomStore = defineStore('room', () => {
       // ② 获取 room_id
       created = mapRoom(roomRow as unknown as RoomRow, 1)
 
-      // ③ 插入 room_members，当前用户绑定为房主
+      // ③ 插入 room_members，当前用户拥有自己的座位
       const { error: joinError } = await supabase.from('room_members').insert({
         room_id: created.id,
         user_id: auth.userId,
@@ -357,17 +360,19 @@ export const useRoomStore = defineStore('room', () => {
     const leavingId = roomId.value
     leavingPromise = (async () => {
       try {
+        // 退房唯一动作：只删除当前用户自己的座位记录。
+        // 房间生命周期由数据库触发器 cleanup_empty_room_after_member_delete 管理。
         const { error: deleteError } = await supabase
           .from('room_members')
           .delete()
-          .eq('room_id', leavingId)
-          .eq('user_id', auth.userId)
+          .match({
+            room_id: leavingId,
+            user_id: auth.userId,
+          })
+
         if (deleteError) {
           error.value = describeError(deleteError)
-          return
         }
-        // 关键判定：删除当前成员后，若房间已经没有成员，立刻删除房间
-        await cleanupIfEmpty(leavingId)
       } catch (cause) {
         error.value = describeError(cause)
       } finally {
@@ -446,7 +451,6 @@ export const useRoomStore = defineStore('room', () => {
     createRoom,
     joinRoom,
     leaveRoom,
-    cleanupIfEmpty,
     setFocusing,
   }
 })
