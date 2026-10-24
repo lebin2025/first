@@ -92,9 +92,21 @@ onMounted(load)
         </div>
       </header>
 
-      <GlassCard v-if="loading" class="state-card">
-        <p class="muted">正在读取总计划…</p>
-      </GlassCard>
+      <div
+        v-if="loading"
+        class="plan-skeleton-grid"
+        aria-busy="true"
+        aria-label="正在加载总计划"
+      >
+        <div v-for="index in 3" :key="index" class="plan-skeleton">
+          <span class="plan-skeleton__line plan-skeleton__line--eyebrow"></span>
+          <span class="plan-skeleton__line plan-skeleton__line--title"></span>
+          <span class="plan-skeleton__line plan-skeleton__line--desc"></span>
+          <span class="plan-skeleton__line plan-skeleton__line--desc short"></span>
+          <span class="plan-skeleton__bar"></span>
+          <span class="plan-skeleton__line plan-skeleton__line--foot"></span>
+        </div>
+      </div>
 
       <GlassCard v-else-if="error" class="state-card">
         <p class="error-text">{{ error }}</p>
@@ -213,6 +225,86 @@ onMounted(load)
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
+}
+
+/* Skeleton 与真实卡片保持同一 Grid / 高度，避免 CLS */
+.plan-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.plan-skeleton {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: clamp(20px, 3vw, 28px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-soft);
+  overflow: hidden;
+}
+
+.plan-skeleton__line,
+.plan-skeleton__bar {
+  display: block;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--text-primary) 7%, transparent) 0%,
+    color-mix(in srgb, var(--text-primary) 14%, transparent) 50%,
+    color-mix(in srgb, var(--text-primary) 7%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.45s ease-in-out infinite;
+}
+
+.plan-skeleton__line--eyebrow {
+  width: 32%;
+  height: 9px;
+}
+
+.plan-skeleton__line--title {
+  width: 68%;
+  height: 22px;
+}
+
+.plan-skeleton__line--desc {
+  width: 92%;
+  height: 11px;
+}
+
+.plan-skeleton__line--desc.short {
+  width: 58%;
+}
+
+.plan-skeleton__bar {
+  width: 100%;
+  height: 7px;
+  margin-top: auto;
+}
+
+.plan-skeleton__line--foot {
+  width: 45%;
+  height: 9px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-skeleton__line,
+  .plan-skeleton__bar {
+    animation: none;
+  }
 }
 
 .plan-grid {

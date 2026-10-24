@@ -116,6 +116,38 @@ class AudioEngine {
   }
 
   /**
+   * 空闲调度：requestIdleCallback，降级 setTimeout 5000ms。
+   * 返回取消函数，供组件卸载时清理。
+   */
+  scheduleIdlePreload(fallbackMs = 5000): () => void {
+    let idleHandle: number | null = null
+    let fallbackTimer: number | null = null
+
+    const start = (): void => {
+      idleHandle = null
+      fallbackTimer = null
+      void this.preloadAll()
+    }
+
+    if (typeof window.requestIdleCallback === 'function') {
+      idleHandle = window.requestIdleCallback(start, { timeout: fallbackMs })
+    } else {
+      fallbackTimer = window.setTimeout(start, fallbackMs)
+    }
+
+    return () => {
+      if (idleHandle !== null && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleHandle)
+        idleHandle = null
+      }
+      if (fallbackTimer !== null) {
+        window.clearTimeout(fallbackTimer)
+        fallbackTimer = null
+      }
+    }
+  }
+
+  /**
    * 串行预热四首音频；每首之间让出主线程，避免一次 decode 卡死 UI。
    * 失败只记录，不影响后续曲目。
    */

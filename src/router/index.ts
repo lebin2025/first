@@ -1,7 +1,6 @@
 // 👈 1. 将 createWebHistory 改为 createWebHashHistory
 import { createRouter, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import StudyRoomView from '@/views/StudyRoomView.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
 
@@ -58,8 +57,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/study-room/:id',
     name: 'StudyRoom',
-    // 静态导入：避免开发态 HMR / 部署后旧 chunk 导致的 dynamic import 失败
-    component: StudyRoomView,
+    component: () => import('@/views/StudyRoomView.vue'),
     meta: { title: '自习室', requiresAuth: true },
   },
   {

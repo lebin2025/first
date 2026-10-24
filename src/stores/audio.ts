@@ -38,6 +38,7 @@ export const useAudioStore = defineStore('audio', () => {
   const readyTracks = ref<AudioTrackId[]>([])
   const preloadState = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const preloadError = ref('')
+  const audioLoadingState = computed(() => preloadState.value)
 
   let initialized = false
   let requestId = 0
@@ -103,6 +104,12 @@ export const useAudioStore = defineStore('audio', () => {
       })
 
     return preloadPromise
+  }
+
+  /** 把预加载排入浏览器空闲队列，返回取消函数 */
+  function schedulePreload(fallbackMs = 5000): () => void {
+    initialize()
+    return audioEngine.scheduleIdlePreload(fallbackMs)
   }
 
   function persistTrack(track: AudioTrackId): void {
@@ -205,9 +212,11 @@ export const useAudioStore = defineStore('audio', () => {
     isReady,
     currentReady,
     preloadState,
+    audioLoadingState,
     preloadError,
     initialize,
     preloadAll,
+    schedulePreload,
     play,
     pause,
     toggle,

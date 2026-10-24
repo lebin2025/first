@@ -1,44 +1,57 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue'
+import { defineAsyncComponent, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import ArtBackground from '@/components/layout/ArtBackground.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
-import { useAudioStore } from '@/stores/audio'
+import { useThemeStore } from '@/stores/theme'
 
-/** 应用根：三主题水彩插画 + 路由页面 + 全局提示 */
+/** 应用根：背景 Canvas 独立分包，避免阻塞首屏 JS */
+const ArtBackground = defineAsyncComponent(
+  () => import('@/components/layout/ArtBackground.vue'),
+)
+
 const route = useRoute()
-const audio = useAudioStore()
+const theme = useThemeStore()
 
-let idleHandle: number | null = null
-let fallbackTimer: number | null = null
+let cancelAudioPreload: (() => void) | null = null
 
-function cancelPreloadSchedule(): void {
-  if (idleHandle !== null && typeof window.cancelIdleCallback === 'function') {
-    window.cancelIdleCallback(idleHandle)
-    idleHandle = null
-  }
-  if (fallbackTimer !== null) {
-    window.clearTimeout(fallbackTimer)
-    fallbackTimer = null
-  }
+const heroPreloads = new Set<string>()
+
+function preloadHeroImage(src: string): void {
+  if (!src || heroPreloads.has(src)) return
+  heroPreloads.add(src)
+
+  const link = document.createElement('link')
+  link.rel = 'preload'
+  link.as = 'image'
+  link.href = src
+  link.setAttribute('fetchpriority', 'high')
+  link.dataset.heroPreload = 'true'
+  document.head.appendChild(link)
 }
 
-onMounted(() => {
-  audio.initialize()
-  const start = (): void => {
-    idleHandle = null
-    fallbackTimer = null
-    void audio.preloadAll()
-  }
+watch(
+  () => theme.current.image,
+  (src) => preloadHeroImage(src),
+  { immediate: true },
+)
 
-  if (typeof window.requestIdleCallback === 'function') {
-    idleHandle = window.requestIdleCallback(start, { timeout: 3000 })
-  } else {
-    fallbackTimer = window.setTimeout(start, 3000)
-  }
+onMounted(() => {
+  // 音频 Store 动态加载，不进入首屏关键 bundle
+  void import('@/stores/audio')
+    .then(({ useAudioStore }) => {
+      const audio = useAudioStore()
+      audio.initialize()
+      cancelAudioPreload = audio.schedulePreload(5000)
+    })
+    .catch((cause) => {
+      console.warn('[app] 音频预加载初始化失败', cause)
+    })
 })
 
-onBeforeUnmount(cancelPreloadSchedule)
+onBeforeUnmount(() => {
+  cancelAudioPreload?.()
+  cancelAudioPreload = null
+})
 </script>
 
 <template>
