@@ -110,7 +110,7 @@ onMounted(load)
       <template v-else-if="masterPlan && summary">
         <header class="master-head">
           <div class="master-head__text">
-            <p class="eyebrow">{{ MEASURE_TYPE_LABELS[masterPlan.measureType] }}</p>
+            <p class="eyebrow">{{ masterPlan.measureDetail || MEASURE_TYPE_LABELS[masterPlan.measureType] }}</p>
             <h1>{{ masterPlan.name }}</h1>
             <p v-if="masterPlan.description" class="master-head__desc">{{ masterPlan.description }}</p>
             <div class="master-head__meta">

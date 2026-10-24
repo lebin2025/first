@@ -10,8 +10,8 @@ import { useToast } from '@/composables/useToast'
 import { diagnoseMasterPlan } from '@/engine/diagnostics'
 import { isValidISODate, todayISO } from '@/lib/date'
 import {
-  MEASURE_TYPE_OPTIONS,
-  type MeasureType,
+  MEASURE_SELECT_OPTIONS,
+  type MeasureSelection,
   type SubPlan,
 } from '@/types/models'
 
@@ -35,7 +35,8 @@ const subPlans = ref<SubPlan[]>([])
 const form = reactive({
   name: '',
   deadline: '',
-  measureType: 'exam' as MeasureType,
+  measureType: 'exam' as MeasureSelection,
+  measureDetail: '',
   description: '',
 })
 
@@ -63,6 +64,7 @@ const canSave = computed(
     !hasDateConflict.value &&
     form.name.trim().length > 0 &&
     isValidISODate(form.deadline) &&
+    (form.measureType !== 'custom' || form.measureDetail.trim().length > 0) &&
     !saving.value,
 )
 
@@ -83,7 +85,8 @@ async function load(): Promise<void> {
   }
   form.name = plan.name
   form.deadline = plan.deadline
-  form.measureType = plan.measureType
+  form.measureType = plan.measureDetail ? 'custom' : plan.measureType
+  form.measureDetail = plan.measureDetail
   form.description = plan.description
   subPlans.value = await subApi.fetchByMaster(plan.id)
   loading.value = false
@@ -96,7 +99,8 @@ async function save(): Promise<void> {
   const input = {
     name: form.name.trim(),
     deadline: form.deadline,
-    measureType: form.measureType,
+    measureType: form.measureType === 'custom' ? ('other' as const) : form.measureType,
+    measureDetail: form.measureType === 'custom' ? form.measureDetail.trim() : '',
     description: form.description.trim(),
   }
   const saved = isEdit.value
@@ -175,10 +179,24 @@ onMounted(load)
               <div class="field">
                 <label class="field__label" for="master-measure">目标衡量标准</label>
                 <select id="master-measure" v-model="form.measureType" class="select">
-                  <option v-for="option in MEASURE_TYPE_OPTIONS" :key="option.value" :value="option.value">
+                  <option v-for="option in MEASURE_SELECT_OPTIONS" :key="option.value" :value="option.value">
                     {{ option.label }}
                   </option>
                 </select>
+              </div>
+
+              <div v-if="form.measureType === 'custom'" class="field form-grid--full">
+                <label class="field__label" for="master-measure-custom">自定义衡量标准</label>
+                <input
+                  id="master-measure-custom"
+                  v-model="form.measureDetail"
+                  class="input"
+                  type="text"
+                  maxlength="120"
+                  placeholder="例如：能独立完成一场 30 分钟演讲"
+                  required
+                />
+                <span class="field__hint">最多 120 字，会随总计划一起保存。</span>
               </div>
 
               <div class="field form-grid--full">

@@ -531,7 +531,12 @@ onBeforeUnmount(() => {
               <SpriteButton :disabled="saving || elapsedMinutes < 1" @click="recordAndExit">
                 记录 {{ elapsedMinutes }} 分钟并退出
               </SpriteButton>
-              <button type="button" class="btn btn--ghost" :disabled="saving" @click="exitWithoutRecord">
+              <button
+                type="button"
+                class="btn btn--ghost overlay__exit-ghost"
+                :disabled="saving"
+                @click="exitWithoutRecord"
+              >
                 不记录，直接退出
               </button>
               <button type="button" class="link-btn" @click="continueFocus">继续专注</button>
@@ -891,6 +896,24 @@ onBeforeUnmount(() => {
   font-size: 13px;
   color: var(--focus-text-soft);
   line-height: 1.7;
+}
+
+.overlay__exit-ghost {
+  color: var(--focus-text-color);
+  border-color: var(--focus-border);
+  background: var(--focus-glass);
+}
+
+.overlay__exit-ghost:hover:not(:disabled),
+.overlay__exit-ghost:focus-visible {
+  color: var(--focus-text-strong);
+  background: color-mix(in srgb, var(--focus-text-color) 14%, transparent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.overlay__exit-ghost:disabled {
+  opacity: 0.5;
 }
 
 .overlay__choices {

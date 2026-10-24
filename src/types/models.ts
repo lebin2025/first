@@ -25,6 +25,17 @@ export const MEASURE_TYPE_OPTIONS: ReadonlyArray<{ value: MeasureType; label: st
   Object.keys(MEASURE_TYPE_LABELS) as MeasureType[]
 ).map((value) => ({ value, label: MEASURE_TYPE_LABELS[value] }))
 
+/** 表单允许在四种预设之外输入自定义衡量标准 */
+export type MeasureSelection = MeasureType | 'custom'
+
+export const MEASURE_SELECT_OPTIONS: ReadonlyArray<{
+  value: MeasureSelection
+  label: string
+}> = [
+  ...MEASURE_TYPE_OPTIONS,
+  { value: 'custom', label: '自定义' },
+]
+
 /** 任务的衡量标准（决定"怎样才算学会"） */
 export type MeasureStandard = 'recall' | 'restate' | 'solve' | 'operate' | 'understand'
 
@@ -82,6 +93,7 @@ export interface MasterPlan {
   /** yyyy-MM-dd */
   deadline: string
   measureType: MeasureType
+  measureDetail: string
   description: string
   /** 数据库占位字段；页面展示请使用 deriveMasterStatus() 计算 */
   status: MasterPlanStatus
@@ -138,6 +150,7 @@ export interface MasterPlanRow {
   name: string
   deadline: string
   measure_type: string
+  measure_detail: string | null
   description: string | null
   status: string
   created_at: string
@@ -187,6 +200,7 @@ export interface MasterPlanInput {
   name: string
   deadline: string
   measureType: MeasureType
+  measureDetail?: string
   description: string
 }
 
@@ -287,6 +301,7 @@ export function mapMasterPlan(row: MasterPlanRow): MasterPlan {
     name: row.name,
     deadline: row.deadline,
     measureType: asMeasureType(row.measure_type),
+    measureDetail: row.measure_detail ?? '',
     description: row.description ?? '',
     status: asMasterStatus(row.status),
     createdAt: row.created_at,

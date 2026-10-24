@@ -1,10 +1,10 @@
 export type AudioTrackId = 'forest' | 'sunset' | 'snow' | 'moon'
 
 export const AUDIO_TRACKS: Array<{ id: AudioTrackId; label: string; src: string }> = [
-  { id: 'forest', label: '魔法森林', src: '/audio/forest.mp3' },
-  { id: 'sunset', label: '黄昏', src: '/audio/sunset.mp3' },
-  { id: 'snow', label: '粉彩雪景', src: '/audio/snow.mp3' },
-  { id: 'moon', label: '月夜松林', src: '/audio/moon.mp3' },
+  { id: 'forest', label: '魔法森林', src: `${import.meta.env.BASE_URL}audio/forest.mp3` },
+  { id: 'sunset', label: '黄昏', src: `${import.meta.env.BASE_URL}audio/sunset.mp3` },
+  { id: 'snow', label: '粉彩雪景', src: `${import.meta.env.BASE_URL}audio/snow.mp3` },
+  { id: 'moon', label: '月夜松林', src: `${import.meta.env.BASE_URL}audio/moon.mp3` },
 ]
 
 interface Voice {

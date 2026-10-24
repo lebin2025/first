@@ -128,7 +128,7 @@ onMounted(load)
           <GlassCard interactive class="plan-card">
             <header class="plan-card__head">
               <div class="plan-card__title">
-                <p class="eyebrow">{{ MEASURE_TYPE_LABELS[summary.masterPlan.measureType] }}</p>
+                <p class="eyebrow">{{ summary.masterPlan.measureDetail || MEASURE_TYPE_LABELS[summary.masterPlan.measureType] }}</p>
                 <h2>{{ summary.masterPlan.name }}</h2>
               </div>
               <StatusTag kind="master" :status="summary.status" dot />
@@ -215,12 +215,14 @@ onMounted(load)
 
 .plan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  align-items: stretch;
 }
 
 .plan-link {
   display: block;
+  height: 100%;
   color: inherit;
   text-decoration: none;
   border-radius: var(--radius-lg);
@@ -252,6 +254,7 @@ onMounted(load)
   flex-direction: column;
   gap: var(--space-4);
   height: 100%;
+  min-height: 220px;
 }
 
 .plan-card__head {

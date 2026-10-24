@@ -25,12 +25,18 @@ create table if not exists public.master_plans (
   deadline date not null,
   measure_type text not null default 'other'
     check (measure_type in ('exam', 'artifact', 'level', 'other')),
+  measure_detail text not null default ''
+    check (char_length(measure_detail) <= 120),
   description text not null default '',
   -- 仅作占位：真实状态由 master_plan_progress 视图 / 前端根据进度与截止日计算
   status text not null default 'active'
     check (status in ('active', 'completed', 'overdue')),
   created_at timestamptz not null default now()
 );
+
+-- 兼容已部署数据库：为旧表补充自定义衡量标准字段
+alter table public.master_plans
+  add column if not exists measure_detail text not null default '';
 
 create table if not exists public.sub_plans (
   id uuid primary key default gen_random_uuid(),

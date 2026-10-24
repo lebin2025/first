@@ -79,6 +79,7 @@ export function useMasterPlans() {
           name: input.name.trim(),
           deadline: input.deadline,
           measure_type: input.measureType,
+          measure_detail: input.measureDetail ?? '',
           description: input.description.trim(),
         })
         .select('*')
@@ -106,6 +107,7 @@ export function useMasterPlans() {
           name: input.name.trim(),
           deadline: input.deadline,
           measure_type: input.measureType,
+          measure_detail: input.measureDetail ?? '',
           description: input.description.trim(),
         })
         .eq('id', id)

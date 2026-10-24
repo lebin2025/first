@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import GlassCard from '@/components/ui/GlassCard.vue'
 import SpriteButton from '@/components/ui/SpriteButton.vue'
@@ -19,6 +19,8 @@ const password = ref('')
 const confirmPassword = ref('')
 const localError = ref('')
 const notice = ref('')
+const showVerifyModal = ref(false)
+let verifyTimer: number | null = null
 
 const isSignup = computed(() => mode.value === 'signup')
 const submitting = computed(() => auth.loading)
@@ -29,6 +31,27 @@ function switchMode(next: 'signin' | 'signup'): void {
   notice.value = ''
   auth.clearError()
 }
+
+function closeVerifyModal(): void {
+  showVerifyModal.value = false
+  if (verifyTimer !== null) {
+    window.clearTimeout(verifyTimer)
+    verifyTimer = null
+  }
+}
+
+function openVerifyModal(): void {
+  closeVerifyModal()
+  showVerifyModal.value = true
+  verifyTimer = window.setTimeout(() => {
+    showVerifyModal.value = false
+    verifyTimer = null
+  }, 5000)
+}
+
+onBeforeUnmount(() => {
+  if (verifyTimer !== null) window.clearTimeout(verifyTimer)
+})
 
 function validate(): boolean {
   if (!email.value.trim()) {
@@ -65,10 +88,11 @@ async function submit(): Promise<void> {
     const result = await auth.signUp(email.value, password.value)
     if (!result.ok) return
     if (result.needsConfirmation) {
-      notice.value = '注册成功。请到邮箱点击确认链接，然后回到这里登录。'
+      notice.value = ''
       mode.value = 'signin'
       password.value = ''
       confirmPassword.value = ''
+      openVerifyModal()
       return
     }
     await afterAuth()
@@ -203,6 +227,28 @@ async function submit(): Promise<void> {
 
       <p class="auth__foot tiny faint">免费个人项目 · 不收集与学习无关的个人信息</p>
     </div>
+
+    <Teleport to="body">
+      <Transition name="verify-fade">
+        <div v-if="showVerifyModal" class="verify-overlay" @click.self="closeVerifyModal">
+          <div
+            class="verify-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="verify-title"
+          >
+            <span class="verify-modal__eyebrow">MAIL SENT</span>
+            <h2 id="verify-title">验证邮件已发送</h2>
+            <p>
+              验证邮件已发送！请前往您的邮箱点击确认链接后再登录。
+            </p>
+            <button type="button" class="verify-modal__button" @click="closeVerifyModal">
+              我知道了
+            </button>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -416,8 +462,94 @@ async function submit(): Promise<void> {
   backdrop-filter: blur(8px);
 }
 
+.verify-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: var(--overlay);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.verify-modal {
+  width: min(420px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: clamp(24px, 4vw, 34px);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-shadow);
+}
+
+.verify-modal__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--text-tertiary);
+}
+
+.verify-modal h2 {
+  font-size: clamp(22px, 3.4vw, 28px);
+  color: var(--text-strong);
+}
+
+.verify-modal p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+.verify-modal__button {
+  align-self: flex-start;
+  min-height: 38px;
+  margin-top: var(--space-2);
+  padding: 0 20px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.verify-modal__button:hover {
+  filter: brightness(1.05);
+}
+
+.verify-fade-enter-active,
+.verify-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.verify-fade-enter-active .verify-modal,
+.verify-fade-leave-active .verify-modal {
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.verify-fade-enter-from,
+.verify-fade-leave-to {
+  opacity: 0;
+}
+
+.verify-fade-enter-from .verify-modal,
+.verify-fade-leave-to .verify-modal {
+  transform: translateY(10px) scale(0.97);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .auth__card {
+    transition: none;
+  }
+
+  .verify-fade-enter-active,
+  .verify-fade-leave-active,
+  .verify-fade-enter-active .verify-modal,
+  .verify-fade-leave-active .verify-modal {
     transition: none;
   }
 }
