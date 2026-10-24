@@ -1,10 +1,44 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import ArtBackground from '@/components/layout/ArtBackground.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
+import { useAudioStore } from '@/stores/audio'
 
 /** 应用根：三主题水彩插画 + 路由页面 + 全局提示 */
 const route = useRoute()
+const audio = useAudioStore()
+
+let idleHandle: number | null = null
+let fallbackTimer: number | null = null
+
+function cancelPreloadSchedule(): void {
+  if (idleHandle !== null && typeof window.cancelIdleCallback === 'function') {
+    window.cancelIdleCallback(idleHandle)
+    idleHandle = null
+  }
+  if (fallbackTimer !== null) {
+    window.clearTimeout(fallbackTimer)
+    fallbackTimer = null
+  }
+}
+
+onMounted(() => {
+  audio.initialize()
+  const start = (): void => {
+    idleHandle = null
+    fallbackTimer = null
+    void audio.preloadAll()
+  }
+
+  if (typeof window.requestIdleCallback === 'function') {
+    idleHandle = window.requestIdleCallback(start, { timeout: 3000 })
+  } else {
+    fallbackTimer = window.setTimeout(start, 3000)
+  }
+})
+
+onBeforeUnmount(cancelPreloadSchedule)
 </script>
 
 <template>

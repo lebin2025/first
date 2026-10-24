@@ -49,7 +49,15 @@ function toggle(): void {
       <span class="audio-player__title">{{ audio.currentLabel }}</span>
       <span v-if="audio.error" class="audio-player__error" role="alert">{{ audio.error }}</span>
       <span v-else class="audio-player__hint">
-        {{ audio.loading ? '正在加载音频…' : audio.isPlaying ? '播放中' : '环境音已暂停' }}
+        {{
+          audio.loading
+            ? '正在加载音频…'
+            : audio.isPlaying
+              ? '播放中'
+              : audio.currentReady
+                ? '已就绪 · 点击播放'
+                : '点击加载并播放'
+        }}
       </span>
     </div>
 

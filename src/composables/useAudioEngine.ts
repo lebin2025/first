@@ -1,5 +1,8 @@
 export type AudioTrackId = 'forest' | 'sunset' | 'snow' | 'moon'
 
+/** 全局解码缓存：idle 预加载与点击播放共用同一份 AudioBuffer */
+export const audioBufferCache = new Map<AudioTrackId, AudioBuffer>()
+
 export const AUDIO_TRACKS: Array<{ id: AudioTrackId; label: string; src: string }> = [
   { id: 'forest', label: '魔法森林', src: `${import.meta.env.BASE_URL}audio/forest.mp3` },
   { id: 'sunset', label: '黄昏', src: `${import.meta.env.BASE_URL}audio/sunset.mp3` },
@@ -20,13 +23,20 @@ class AudioEngine {
   private context: AudioContext | null = null
   private master: GainNode | null = null
   private current: Voice | null = null
-  private buffers = new Map<AudioTrackId, AudioBuffer>()
+  private buffers = audioBufferCache
   private loading = new Map<AudioTrackId, Promise<AudioBuffer>>()
   private consumers = 0
   private releaseTimer: number | null = null
   private volume = 0.55
+  private preloading: Promise<void> | null = null
 
   onStateChange: ((playing: boolean) => void) | null = null
+  onBufferReady: ((track: AudioTrackId) => void) | null = null
+  onPreloadError: ((track: AudioTrackId, cause: unknown) => void) | null = null
+
+  hasBuffer(track: AudioTrackId): boolean {
+    return this.buffers.has(track)
+  }
 
   get isPlaying(): boolean {
     return this.current !== null && this.context?.state === 'running'
@@ -89,6 +99,7 @@ class AudioEngine {
       const context = this.ensureContext()
       const buffer = await context.decodeAudioData(arrayBuffer.slice(0))
       this.buffers.set(track, buffer)
+      this.onBufferReady?.(track)
       return buffer
     })()
 
@@ -102,6 +113,31 @@ class AudioEngine {
 
   async preload(track: AudioTrackId): Promise<void> {
     await this.loadBuffer(track)
+  }
+
+  /**
+   * 串行预热四首音频；每首之间让出主线程，避免一次 decode 卡死 UI。
+   * 失败只记录，不影响后续曲目。
+   */
+  async preloadAll(): Promise<void> {
+    if (this.preloading) return this.preloading
+
+    this.preloading = (async () => {
+      for (const track of AUDIO_TRACKS) {
+        try {
+          await this.loadBuffer(track.id)
+        } catch (cause) {
+          this.onPreloadError?.(track.id, cause)
+        }
+        await new Promise<void>((resolve) => window.setTimeout(resolve, 0))
+      }
+    })()
+
+    try {
+      await this.preloading
+    } finally {
+      this.preloading = null
+    }
   }
 
   async play(track: AudioTrackId, volume?: number): Promise<void> {

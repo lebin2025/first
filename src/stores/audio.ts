@@ -35,10 +35,20 @@ export const useAudioStore = defineStore('audio', () => {
   const loading = ref(false)
   const error = ref('')
   const volume = ref(readVolume())
+  const readyTracks = ref<AudioTrackId[]>([])
+  const preloadState = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const preloadError = ref('')
 
   let initialized = false
   let requestId = 0
+  let preloadPromise: Promise<void> | null = null
 
+  const isReady = computed(
+    () => readyTracks.value.length === AUDIO_TRACKS.length,
+  )
+  const currentReady = computed(() =>
+    readyTracks.value.includes(currentTrack.value),
+  )
   const currentLabel = computed(
     () => AUDIO_TRACKS.find((item) => item.id === currentTrack.value)?.label ?? '环境音',
   )
@@ -52,6 +62,47 @@ export const useAudioStore = defineStore('audio', () => {
       isPlaying.value = playing
       if (!playing) loading.value = false
     }
+    audioEngine.onBufferReady = (track) => {
+      if (!readyTracks.value.includes(track)) {
+        readyTracks.value = [...readyTracks.value, track]
+      }
+    }
+    audioEngine.onPreloadError = (track, cause) => {
+      preloadError.value =
+        cause instanceof Error ? cause.message : `音频 ${track} 预加载失败`
+    }
+
+    readyTracks.value = AUDIO_TRACKS.filter((track) =>
+      audioEngine.hasBuffer(track.id),
+    ).map((track) => track.id)
+  }
+
+  /** 页面空闲时串行预热四首音频，失败只记录，不阻塞界面 */
+  async function preloadAll(): Promise<void> {
+    initialize()
+    if (preloadPromise) return preloadPromise
+    if (readyTracks.value.length === AUDIO_TRACKS.length) {
+      preloadState.value = 'ready'
+      return
+    }
+
+    preloadState.value = 'loading'
+    preloadError.value = ''
+    preloadPromise = audioEngine
+      .preloadAll()
+      .then(() => {
+        preloadState.value = 'ready'
+      })
+      .catch((cause) => {
+        preloadState.value = 'error'
+        preloadError.value =
+          cause instanceof Error ? cause.message : '音频预加载失败'
+      })
+      .finally(() => {
+        preloadPromise = null
+      })
+
+    return preloadPromise
   }
 
   function persistTrack(track: AudioTrackId): void {
@@ -78,7 +129,8 @@ export const useAudioStore = defineStore('audio', () => {
     currentTrack.value = track
     persistTrack(track)
     error.value = ''
-    loading.value = true
+    // 已预加载的音频不显示 Loading，点击直接播放
+    loading.value = !readyTracks.value.includes(track)
 
     // 必须在用户手势的同步栈内创建/恢复 AudioContext
     audioEngine.unlock()
@@ -149,7 +201,13 @@ export const useAudioStore = defineStore('audio', () => {
     loading,
     error,
     volume,
+    readyTracks,
+    isReady,
+    currentReady,
+    preloadState,
+    preloadError,
     initialize,
+    preloadAll,
     play,
     pause,
     toggle,
