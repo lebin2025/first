@@ -17,21 +17,21 @@ export const THEME_OPTIONS: ThemeOption[] = [
     id: 'ride',
     label: '星夜骑行',
     hint: '深空、星轨与夜骑剪影',
-    image: '/bg-ride.jpg',
+    image: `${import.meta.env.BASE_URL}bg-ride.jpg`,
     scheme: 'dark',
   },
   {
     id: 'sakura',
     label: '樱落',
     hint: '浪漫、治愈，粉色花瓣',
-    image: '/bg-sakura.jpg',
+    image: `${import.meta.env.BASE_URL}bg-sakura.jpg`,
     scheme: 'light',
   },
   {
     id: 'winter',
     label: '冬日蓝调',
     hint: '明亮蓝色手绘雪景',
-    image: '/bg-winter.jpg',
+    image: `${import.meta.env.BASE_URL}bg-winter.jpg`,
     scheme: 'light',
   },
 ]
@@ -87,6 +87,8 @@ export const useThemeStore = defineStore('theme', () => {
     const root = document.documentElement
     root.dataset.theme = theme.value
     root.style.colorScheme = current.value.scheme
+    // CSS 变量不能读取 import.meta.env，在运行时注入带 BASE_URL 的图片路径
+    root.style.setProperty('--bg-image', `url("${current.value.image}")`)
   }
 
   function setTheme(next: ThemeName): void {

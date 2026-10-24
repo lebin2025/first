@@ -68,7 +68,7 @@
 :root,
 html[data-theme='ride'] {
   --theme-name: 'ride';
-  --bg-image: url('/bg-ride.jpg');
+  --bg-image: none;
   --bg-base: #0a0f1e;
   --bg-deep: #050912;
   --bg-mask: rgba(10, 15, 30, 0.45);
@@ -150,7 +150,7 @@ html[data-theme='ride'] {
    ========================================================================== */
 html[data-theme='sakura'] {
   --theme-name: 'sakura';
-  --bg-image: url('/bg-sakura.jpg');
+  --bg-image: none;
   --bg-base: #f6e6ea;
   --bg-deep: #edd3dd;
   --art-mask: rgba(255, 255, 255, 0.3);
@@ -244,7 +244,7 @@ html[data-theme='sakura'] {
    ========================================================================== */
 html[data-theme='winter'] {
   --theme-name: 'winter';
-  --bg-image: url('/bg-winter.jpg');
+  --bg-image: none;
   --bg-base: #eaf3fb;
   --bg-deep: #d8e8f5;
   --bg-mask: rgba(255, 255, 255, 0.35);

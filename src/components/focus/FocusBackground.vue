@@ -12,7 +12,7 @@ const failed = ref(false)
 let preloadToken = 0
 
 const imageSrc = computed(
-  () => `/bg-${themeStore.theme}.jpg?v=${IMAGE_VERSION}`,
+  () => `${import.meta.env.BASE_URL}bg-${themeStore.theme}.jpg?v=${IMAGE_VERSION}`,
 )
 
 function preload(src: string, token: number): void {

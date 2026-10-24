@@ -1,18 +1,22 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="forest">
+<html lang="zh-CN" data-theme="ride">
   <head>
     <meta charset="UTF-8" />
     <script>
       try {
         const savedTheme = localStorage.getItem('shiguang.theme')
-        if (savedTheme === 'forest' || savedTheme === 'sakura' || savedTheme === 'snow') {
-          document.documentElement.dataset.theme = savedTheme
+        const theme =
+          savedTheme === 'forest' ? 'ride'
+          : savedTheme === 'snow' ? 'winter'
+          : savedTheme
+        if (theme === 'ride' || theme === 'sakura' || theme === 'winter') {
+          document.documentElement.dataset.theme = theme
         }
       } catch {
-        // localStorage 不可用时保持默认 forest
+        // localStorage 不可用时保持默认 ride
       }
     </script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

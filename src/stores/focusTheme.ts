@@ -21,7 +21,7 @@ export const FOCUS_THEMES: FocusThemeConfig[] = [
     label: '魔法森林',
     english: 'FOREST',
     description: '荧光孢子漂浮的深林，适合长时间专注。',
-    image: '/bg-forest.jpg',
+    image: `${import.meta.env.BASE_URL}bg-forest.jpg`,
     dot: '#7dffc4',
   },
   {
@@ -29,7 +29,7 @@ export const FOCUS_THEMES: FocusThemeConfig[] = [
     label: '黄昏',
     english: 'SUNSET',
     description: '金色微尘与暖色天光，通透而温柔。',
-    image: '/bg-sunset.jpg',
+    image: `${import.meta.env.BASE_URL}bg-sunset.jpg`,
     dot: '#e7b86a',
   },
   {
@@ -37,7 +37,7 @@ export const FOCUS_THEMES: FocusThemeConfig[] = [
     label: '粉彩雪景',
     english: 'SNOW',
     description: '粉彩雪景与缓慢落雪，安静而清透。',
-    image: '/bg-snow.jpg',
+    image: `${import.meta.env.BASE_URL}bg-snow.jpg`,
     dot: '#f2b8c6',
   },
   {
@@ -45,7 +45,7 @@ export const FOCUS_THEMES: FocusThemeConfig[] = [
     label: '月夜松林',
     english: 'MOON',
     description: '月夜松林与淡蓝萤火，适合夜间心流。',
-    image: '/bg-moon.jpg',
+    image: `${import.meta.env.BASE_URL}bg-moon.jpg`,
     dot: '#a9c5ff',
   },
 ]
@@ -62,7 +62,13 @@ function readStoredTheme(): FocusThemeId {
 
 function applyRootTheme(theme: FocusThemeId): void {
   if (typeof document === 'undefined') return
-  document.documentElement.setAttribute('data-focus-theme', theme)
+  const root = document.documentElement
+  root.setAttribute('data-focus-theme', theme)
+  const config = FOCUS_THEMES.find((item) => item.id === theme)
+  if (config) {
+    // CSS 变量不能读 import.meta.env，用运行时 URL 覆盖
+    root.style.setProperty('--focus-bg-img', `url("${config.image}")`)
+  }
 }
 
 /**

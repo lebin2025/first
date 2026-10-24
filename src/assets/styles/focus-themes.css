@@ -5,7 +5,7 @@
 
 :root,
 html[data-focus-theme='forest'] {
-  --focus-bg-img: url('/bg-forest.jpg');
+  --focus-bg-img: none;
   --focus-bg: #07170f;
   --focus-bg-mask: rgba(10, 20, 15, 0.5);
   --focus-mask-backdrop: blur(0px);
@@ -31,7 +31,7 @@ html[data-focus-theme='forest'] {
 }
 
 html[data-focus-theme='sunset'] {
-  --focus-bg-img: url('/bg-sunset.jpg');
+  --focus-bg-img: none;
   --focus-bg: #f6ead6;
   --focus-bg-mask: rgba(255, 255, 255, 0.4);
   --focus-mask-backdrop: blur(4px);
@@ -57,7 +57,7 @@ html[data-focus-theme='sunset'] {
 }
 
 html[data-focus-theme='snow'] {
-  --focus-bg-img: url('/bg-snow.jpg');
+  --focus-bg-img: none;
   --focus-bg: #eaf4fb;
   --focus-bg-mask: rgba(255, 255, 255, 0.4);
   --focus-mask-backdrop: blur(3px);
@@ -83,7 +83,7 @@ html[data-focus-theme='snow'] {
 }
 
 html[data-focus-theme='moon'] {
-  --focus-bg-img: url('/bg-moon.jpg');
+  --focus-bg-img: none;
   --focus-bg: #050a18;
   --focus-bg-mask: rgba(15, 23, 42, 0.5);
   --focus-mask-backdrop: blur(0px);
