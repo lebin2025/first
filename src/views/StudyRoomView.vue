@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
-import type { RealtimeChannel } from '@supabase/supabase-js'
 import AppShell from '@/components/layout/AppShell.vue'
 import GlassCard from '@/components/ui/GlassCard.vue'
 import ZenTimer from '@/components/focus/ZenTimer.vue'
 import RoomChat from '@/components/focus/RoomChat.vue'
 import GlobalAudioPlayer from '@/components/audio/GlobalAudioPlayer.vue'
-import { supabase } from '@/lib/supabase'
 import { useRoomStore, type RoomSeat } from '@/stores/room'
 import { useAuthStore } from '@/stores/auth'
 import { useAudioStore } from '@/stores/audio'
@@ -24,11 +22,8 @@ const audioTracks = audio.tracks
 const focusMinutes = ref(25)
 const timerRunning = ref(false)
 const loadingError = ref('')
-let seatChannel: RealtimeChannel | null = null
-let seatRetryTimer: number | null = null
 let seatPollTimer: number | null = null
-let seatRetryCount = 0
-let membersRefreshing = false
+let isFetchingMembers = false
 
 const roomId = computed(() => (typeof route.params.id === 'string' ? route.params.id : ''))
 
@@ -66,14 +61,14 @@ async function loadRoom(): Promise<void> {
 
 /** 只刷新座位，不触发整页导航或整页刷新 */
 async function fetchRoomMembers(): Promise<void> {
-  if (!roomId.value || membersRefreshing) return
-  membersRefreshing = true
+  if (!roomId.value || isFetchingMembers) return
+  isFetchingMembers = true
   try {
     await room.fetchRoom(roomId.value)
   } catch (cause) {
     console.warn('[study-room] 座位刷新失败', cause)
   } finally {
-    membersRefreshing = false
+    isFetchingMembers = false
   }
 }
 
@@ -88,88 +83,7 @@ function startSeatPolling(): void {
   if (seatPollTimer !== null) return
   seatPollTimer = window.setInterval(() => {
     void fetchRoomMembers()
-  }, 5000)
-}
-
-function disposeSeatChannel(): void {
-  if (seatRetryTimer !== null) {
-    window.clearTimeout(seatRetryTimer)
-    seatRetryTimer = null
-  }
-  const dead = seatChannel
-  seatChannel = null
-  if (dead) void supabase.removeChannel(dead)
-}
-
-function connectSeatChannel(): void {
-  const targetRoomId = roomId.value
-  if (!targetRoomId) return
-
-  disposeSeatChannel()
-  const nextChannel = supabase
-    .channel(`room-seats:${targetRoomId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'room_members',
-        filter: `room_id=eq.${targetRoomId}`,
-      },
-      () => {
-        void fetchRoomMembers()
-      },
-    )
-    .on(
-      'postgres_changes',
-      {
-        event: 'DELETE',
-        schema: 'public',
-        table: 'room_members',
-        filter: `room_id=eq.${targetRoomId}`,
-      },
-      () => {
-        void fetchRoomMembers()
-      },
-    )
-
-  seatChannel = nextChannel
-  nextChannel.subscribe((status) => {
-    if (seatChannel !== nextChannel) return
-
-    if (status === 'SUBSCRIBED') {
-      if (seatRetryTimer !== null) {
-        window.clearTimeout(seatRetryTimer)
-        seatRetryTimer = null
-      }
-      seatRetryCount = 0
-      stopSeatPolling()
-      return
-    }
-
-    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-      if (seatRetryTimer !== null) return
-
-      if (seatRetryCount >= 3) {
-        console.warn('[study-room] 座位实时连接连续失败 3 次，已切换为 5 秒轮询。')
-        disposeSeatChannel()
-        startSeatPolling()
-        return
-      }
-
-      seatRetryCount += 1
-      seatRetryTimer = window.setTimeout(() => {
-        seatRetryTimer = null
-        if (roomId.value === targetRoomId) connectSeatChannel()
-      }, 3000)
-    }
-  })
-}
-
-function resetSeatRealtime(): void {
-  disposeSeatChannel()
-  stopSeatPolling()
-  seatRetryCount = 0
+  }, 3000)
 }
 
 function handleBeforeUnload(): void {
@@ -187,26 +101,30 @@ function onComplete(): void {
 }
 
 watch(roomId, async () => {
-  resetSeatRealtime()
+  stopSeatPolling()
   await loadRoom()
-  if (!loadingError.value) connectSeatChannel()
+  if (!loadingError.value) startSeatPolling()
 })
 
 onMounted(async () => {
   window.addEventListener('beforeunload', handleBeforeUnload)
   await loadRoom()
-  if (!loadingError.value) connectSeatChannel()
+  if (!loadingError.value) startSeatPolling()
 })
 
 // 路由离开：先完成退出事务，再允许导航；失败也重置本地状态
 onBeforeRouteLeave(async () => {
+  stopSeatPolling()
   await room.leaveRoom()
   return true
 })
 
 // 同一组件切换到另一个房间时，先退出旧房间，避免残留成员记录
 onBeforeRouteUpdate(async (to, from) => {
-  if (to.params.id !== from.params.id) await room.leaveRoom()
+  if (to.params.id !== from.params.id) {
+    stopSeatPolling()
+    await room.leaveRoom()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -215,8 +133,8 @@ onBeforeUnmount(() => {
 })
 
 onUnmounted(() => {
-  // 必须先销毁 Realtime 频道和轮询定时器，再兜底退出房间
-  resetSeatRealtime()
+  // 清除座位轮询定时器，再兜底退出房间
+  stopSeatPolling()
   void room.leaveRoom()
 })
 </script>

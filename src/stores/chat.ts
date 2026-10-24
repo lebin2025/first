@@ -1,6 +1,5 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { describeError } from '@/lib/errors'
 import { useAuthStore } from '@/stores/auth'
@@ -29,17 +28,13 @@ interface ProfileRow {
   nickname: string | null
 }
 
-const POLL_INTERVAL_MS = 5000
-const REALTIME_RETRY_MS = 3000
-const MAX_REALTIME_RETRIES = 3
+const POLL_INTERVAL_MS = 3000
 
 /**
- * 房间聊天：WebSocket 主链路 + HTTP 轮询兜底。
- *
- * - messages INSERT 实时推送；
- * - 每 5 秒 HTTP 增量拉取，防止断连漏消息；
- * - Realtime 失败最多延迟重试 3 次，绝不递归调用；
- * - stopPolling / reset 负责清理 channel 与 interval。
+ * 房间聊天：纯 HTTP 短轮询，不建立任何 WebSocket。
+ * - 每 3 秒增量拉取 messages；
+ * - pollingNow 防止请求堆积；
+ * - stopPolling / reset 清理 interval。
  */
 export const useChatStore = defineStore('chat', () => {
   const auth = useAuthStore()
@@ -49,17 +44,12 @@ export const useChatStore = defineStore('chat', () => {
   const loading = ref(false)
   const sending = ref(false)
   const polling = ref(false)
-  const realtimeState = ref<'idle' | 'connecting' | 'connected' | 'fallback'>('idle')
   const error = ref('')
   const lastSyncedAt = ref('')
 
   let pollTimer: number | null = null
   let pollingNow = false
   let loadGeneration = 0
-  let messageChannel: RealtimeChannel | null = null
-  let realtimeRetryTimer: number | null = null
-  let realtimeRetryCount = 0
-  let channelGeneration = 0
   const nicknameCache = new Map<string, string>()
 
   function fallbackNickname(userId: string): string {
@@ -218,10 +208,8 @@ export const useChatStore = defineStore('chat', () => {
       window.clearInterval(pollTimer)
       pollTimer = null
     }
-    disposeMessageChannel()
     polling.value = false
     loading.value = false
-    realtimeState.value = 'idle'
   }
 
   function startPolling(): void {
@@ -230,79 +218,6 @@ export const useChatStore = defineStore('chat', () => {
     pollTimer = window.setInterval(() => {
       void pollLatest()
     }, POLL_INTERVAL_MS)
-  }
-
-  function disposeMessageChannel(): void {
-    channelGeneration += 1
-    if (realtimeRetryTimer !== null) {
-      window.clearTimeout(realtimeRetryTimer)
-      realtimeRetryTimer = null
-    }
-    const dead = messageChannel
-    messageChannel = null
-    if (dead) void supabase.removeChannel(dead)
-  }
-
-  function handleMessageRealtimeFailure(targetRoomId: string, ownerGeneration: number): void {
-    if (ownerGeneration !== channelGeneration || realtimeRetryTimer !== null) return
-
-    if (realtimeRetryCount >= MAX_REALTIME_RETRIES) {
-      realtimeState.value = 'fallback'
-      console.warn('[chat] Realtime 连续失败 3 次，已静默切换为 5 秒 HTTP 轮询。')
-      disposeMessageChannel()
-      return
-    }
-
-    realtimeRetryCount += 1
-    realtimeRetryTimer = window.setTimeout(() => {
-      realtimeRetryTimer = null
-      if (roomId.value === targetRoomId) connectMessageRealtime(targetRoomId)
-    }, REALTIME_RETRY_MS)
-  }
-
-  function connectMessageRealtime(targetRoomId: string): void {
-    disposeMessageChannel()
-    const ownerGeneration = channelGeneration
-    realtimeState.value = 'connecting'
-
-    const nextChannel = supabase
-      .channel(`room-messages:${targetRoomId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `room_id=eq.${targetRoomId}`,
-        },
-        async (payload) => {
-          if (ownerGeneration !== channelGeneration) return
-          const row = payload.new as MessageRow
-          if (!row?.id || messages.value.some((message) => message.id === row.id)) return
-          const nickname = await resolveNickname(row.user_id)
-          messages.value = [...messages.value, toMessage(row, nickname)]
-          lastSyncedAt.value = new Date().toISOString()
-        },
-      )
-
-    messageChannel = nextChannel
-    nextChannel.subscribe((status) => {
-      if (ownerGeneration !== channelGeneration) return
-
-      if (status === 'SUBSCRIBED') {
-        if (realtimeRetryTimer !== null) {
-          window.clearTimeout(realtimeRetryTimer)
-          realtimeRetryTimer = null
-        }
-        realtimeRetryCount = 0
-        realtimeState.value = 'connected'
-        return
-      }
-
-      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-        handleMessageRealtimeFailure(targetRoomId, ownerGeneration)
-      }
-    })
   }
 
   async function load(targetRoomId: string): Promise<void> {
@@ -320,8 +235,6 @@ export const useChatStore = defineStore('chat', () => {
       messages.value = loaded
       lastSyncedAt.value = new Date().toISOString()
       startPolling()
-      realtimeRetryCount = 0
-      connectMessageRealtime(targetRoomId)
     } finally {
       if (generation === loadGeneration) loading.value = false
     }
@@ -402,7 +315,6 @@ export const useChatStore = defineStore('chat', () => {
     loading,
     sending,
     polling,
-    realtimeState,
     error,
     lastSyncedAt,
     load,
